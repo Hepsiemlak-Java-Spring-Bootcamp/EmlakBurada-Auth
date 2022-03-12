@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import emlakburada.dto.AuthRequest;
 import emlakburada.dto.AuthResponse;
 import emlakburada.entity.User;
+import emlakburada.exception.UserNotFoundException;
+import emlakburada.exception.UserPasswordNotValidException;
 import emlakburada.repository.AuthRepository;
 import emlakburada.util.JwtUtil;
 import emlakburada.util.UserUtil;
@@ -20,17 +22,14 @@ public class AuthService {
 
 	private final JwtUtil jwtUtil;
 
-	public AuthResponse getToken(AuthRequest request) throws Exception {
-		User user = authRepository.findByEmail(request.getEmail());
+	public AuthResponse getToken(AuthRequest request) throws UserPasswordNotValidException {
+		User user = authRepository.findByEmail(request.getEmail())
+				.orElseThrow(() -> new UserNotFoundException("User not found"));
 
-		if (user == null) {
-			log.error("User not found with email " + request.getEmail());
-			throw new Exception("User not found");
-		}
 
 		if (!UserUtil.isValidPassword(user.getPassword(), request.getPassword())) {
 			log.error("User's password not valid " + request.getEmail());
-			throw new Exception("User's password not valid");
+			throw new UserPasswordNotValidException("User's password not valid");
 		}
 
 		return new AuthResponse(jwtUtil.generateToken(user));

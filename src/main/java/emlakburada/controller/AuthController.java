@@ -18,7 +18,7 @@ public final class AuthController {
 	private final AuthService authService;
 
 	@PostMapping(value = "/auth")
-	public ResponseEntity<AuthResponse> getToken(@RequestBody AuthRequest request) throws Exception {
+	public ResponseEntity<AuthResponse> getToken(@RequestBody AuthRequest request) {
 		return new ResponseEntity<>(authService.getToken(request), HttpStatus.OK);
 	}
 
